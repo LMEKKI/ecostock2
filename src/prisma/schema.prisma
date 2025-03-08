@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id               String   @id @default(uuid())
+    username         String   @unique
+    firstName        String?
+    lastName         String?
+    password         String
+    role             Role     @default(USER)
+    dateCreation     DateTime @default(now())
+    dateModification DateTime @updatedAt
+    campingId        String?
+    camping          Camping? @relation(fields: [campingId], references: [id])
+    sectionId        String?
+    section          Section? @relation(fields: [sectionId], references: [id])
+    Order            Order?   @relation(fields: [orderId], references: [id])
+    orderId          String?
+}
+
+model Camping {
+    id               String    @id @default(uuid())
+    name             String
+    adresse          Int
+    dateCreation     DateTime  @default(now())
+    dateModification DateTime  @updatedAt
+    sections         Section[]
+    User             User[]
+}
+
+model Section {
+    id               String        @id @default(uuid())
+    name             String
+    adresse          String
+    campingId        String
+    camping          Camping       @relation(fields: [campingId], references: [id])
+    dateCreation     DateTime      @default(now())
+    dateModification DateTime      @updatedAt
+    User             User[]
+    SectionType      SectionType[]
+}
+
+model SectionType {
+    id               String     @id @default(uuid())
+    name             String
+    dateCreation     DateTime   @default(now())
+    dateModification DateTime   @updatedAt
+    section          Section[]
+    category         Category[]
+}
+
+model Category {
+    id               String        @id @default(uuid())
+    name             String
+    dateCreation     DateTime      @default(now())
+    dateModification DateTime      @updatedAt
+    datasheet        Datasheet[]
+    sectionType      SectionType[]
+}
+
+model Datasheet {
+    id               String       @id @default(uuid())
+    name             String
+    dateCreation     DateTime     @default(now())
+    dateModification DateTime     @updatedAt
+    category         Category[]
+    ingredient       ingredient[]
+}
+
+model ingredient {
+    id               String      @id @default(uuid())
+    name             String
+    dateCreation     DateTime    @default(now())
+    dateModification DateTime    @updatedAt
+    datasheet        Datasheet[]
+    unit             unit[]
+    weight           weight[]
+}
+
+model unit {
+    id               String       @id @default(uuid())
+    name             String
+    dateCreation     DateTime     @default(now())
+    dateModification DateTime     @updatedAt
+    ingredient       ingredient[]
+}
+
+model weight {
+    id               String       @id @default(uuid())
+    name             String
+    dateCreation     DateTime     @default(now())
+    dateModification DateTime     @updatedAt
+    ingredient       ingredient[]
+}
+
+model Order {
+    id               String   @id @default(uuid())
+    dateCreation     DateTime @default(now())
+    dateModification DateTime @updatedAt
+    user             User[]
+    content          Json
+    status           String
+}
+
+enum Role {
+    ADMIN
+    USER
+}
